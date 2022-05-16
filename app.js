@@ -132,6 +132,7 @@ app.post("/addStudent/:apikey",(req,res)=>{
                         addstudent.Verification="false"
                         addstudent.verifCode= ""
                         addstudent.resetCode=""
+                        addstudent.school =userupload.school
                         //saving the student data
                         addstudent.save((err)=>{
                             if (err) {
@@ -207,6 +208,7 @@ app.post("/verify/:apikey/:user", (req,res)=>{
                             if (err){
                                 console.log(err);
                             }else{
+                                
                                 const mailoption= {
                                     from: 'soludorex@gmail.com',
                                     to: data.email,
@@ -220,13 +222,13 @@ app.post("/verify/:apikey/:user", (req,res)=>{
                                             console.log(error);
                                         }else{
                                             console.log('email sent '+ info.response);
-                                            res.json({access:true, user:true, pastverf:false, mailedVerf:true})
+                                            res.json({access:true, user:true,otp:true, pastverf:false, mailedVerf:true})
                                         }
                                         
                                     })
                                 }
-                                sendMail()
-                                res.json({access:true, user:true, otp:true})
+                                sendMail();
+                                // res.json({access:true, user:true, otp:true})
                             }
                         })
                     }else{
@@ -317,7 +319,7 @@ app.get("/getafulluser/:username", (req,res)=>{
 
                             res.json({acess:true,userAvailable:true,assAvailable:true,userData:userdata,assignments:userAssignment })
                         }else{
-                            res.json({access:true, userAvailable:true, assAvailable:false, userdata:userdata})
+                            res.json({access:true, userAvailable:true, assAvailable:false, userdata:userdata, assignments:userAssignment })
                         }
                     }
                 })
@@ -472,11 +474,27 @@ app.get("/getallbook/:apikey",(req,res)=>{
     }
 })
 
+app.get('/item/:id', (req,res)=>{
+    const items = req.params.id
+    assignment.findOne({_id:items}, (err,data)=>{
+        if (err) {
+            console.log(err);
+        } else {
+            if (data) {
+                res.json({access:true, item: true, url:data.bookLocation})
+            } else {
+                res.json({access:true, item:false})
+            }
+        }
+    })
+})
 
+// working
 app.get('/static/uploads/:item', (req,res)=>{
-    // res.pipe("static/uploads/"+req.params.item)
+    // res.pipe("static/up:loads/"+req.params.item)
     const filess= req.params.item
     res.sendFile(__dirname+'/static/uploads/'+filess)
+    // res.json()
     // download("http://localhost:5000/static/uploads/Lincolntimetablelinic6280fdb4347674a2ac136cb0123.pdf", "static/uploads")
 })
 
