@@ -78,5 +78,21 @@ url == itemname
 
 AllBooks == GET
 /getallbook/:apikey
-{access:true,item:true, data}
-         
+{access:true,item:true, data:[{
+    _id
+    name: String,
+    subject: String,
+    topic: String,
+    grade: String,
+    bookLocation: String,
+    bookDescription: String,
+    userid: String,
+}]}
+input ==
+url == apikey
+
+item == GET
+/item/:item
+{access:true, item: true, url:data.bookLocation}
+input ==
+url = id
