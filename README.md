@@ -86,7 +86,7 @@ AllBooks == GET
     grade: String,
     bookLocation: String,
     bookDescription: String,
-    userid: String,
+    userid: String or username,
 }]}
 input ==
 url == apikey
