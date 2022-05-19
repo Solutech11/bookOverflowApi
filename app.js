@@ -4,8 +4,8 @@ const app =express();
 
 //parsing data
 const bodyParser =require('body-parser');
-app.use(bodyParser.urlencoded({extended:false}));
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({limit: '20mb', extended: true}));
+app.use(bodyParser.json({limit: '20mb', extended: true}))
 
 
 const https= require('https')
@@ -67,6 +67,11 @@ const mongoose = require('mongoose');
 const Student = require('./models/students');
 //requiring assignment model
 const assignment = require('./models/assignment');
+// const { json } = require('express/lib/response');
+
+
+//views engine
+app.set('view engine','ejs')
 // const assignment = require('./models/assignment');
 
 mongoose.connect('mongodb+srv://soludo:xerewgida@studenass.7efor.mongodb.net/studenAss?retryWrites=true&w=majority',{useNewUrlParser:true, useUnifiedTopology:true}).then((result)=>{
@@ -81,6 +86,10 @@ mongoose.connect('mongodb+srv://soludo:xerewgida@studenass.7efor.mongodb.net/stu
     console.log(error);
 })
 
+//website
+const weblink ='http://localhost:4000/';
+
+const open =require('open')
 
 //working
 app.post("/addStudent/:apikey",(req,res)=>{
@@ -103,9 +112,9 @@ app.post("/addStudent/:apikey",(req,res)=>{
                     
                     //if user is verified
                     if (data.Verification==false) {
-                        res.json({access:true, item:false, upload:false, existing:true, verified:false, existtype:'email'})
+                        res.json({access:true, item:true, upload:false, existing:true, verified:false, existtype:'email'})
                     }else{
-                        res.json({access:true, item:false, upload:false, existing:true, verified:true, existtype:'email'})
+                        res.json({access:true, item:true, upload:false, existing:true, verified:true, existtype:'email'})
                     }
                     
                 //no user data
@@ -116,9 +125,9 @@ app.post("/addStudent/:apikey",(req,res)=>{
                         } else {
                             if (data) {
                                 if (data.Verification==false) {
-                                    res.json({access:true, item:false, upload:false, existing:true, verified:false, existtype:'username'})
+                                    res.json({access:true, item:true, upload:false, existing:true, verified:false, existtype:'username'})
                                 }else{
-                                    res.json({access:true, item:false, upload:false, existing:true, verified:true, existtype:'username'})
+                                    res.json({access:true, item:true, upload:false, existing:true, verified:true, existtype:'username'})
                                 }
                             }else{
                                 //check if there are any input
@@ -177,6 +186,8 @@ app.post("/login/:apikey",(req,res)=>{
                             res.json({access:true, fill:true, user:true, verified:false,data})
                         }
                         
+                    }else{
+                        res.json({access:true, fill:true, user:false, verified:false})
                     }
                 }
             })
@@ -317,9 +328,10 @@ app.get("/getafulluser/:username", (req,res)=>{
                         if (data.length!=0) {
                             const userAssignment= data;
 
-                            res.json({acess:true,userAvailable:true,assAvailable:true,userData:userdata,assignments:userAssignment })
+                            res.json({access:true,userAvailable:true,assAvailable:true,userData:userdata,assignments:userAssignment })
                         }else{
-                            res.json({access:true, userAvailable:true, assAvailable:false, userdata:userdata, assignments:userAssignment })
+                            const userAssignment= data;
+                            res.json({access:true, userAvailable:true, assAvailable:false, userData:userdata, assignments:userAssignment })
                         }
                     }
                 })
@@ -330,7 +342,36 @@ app.get("/getafulluser/:username", (req,res)=>{
         }
     })
 })
+app.get("/getafulluserbyId/:id", (req,res)=>{
+    const user=  req.params.id;
+    Student.findOne({_id: user}, (err,data)=>{
+        if(err){
+            console.log(err);
+        }else{
+            // console.log(dat);
+            if (data) {
+                const userdata= data;
+                assignment.find({userid:userdata._id},(err,data)=>{
+                    if (err) {
+                        console.log(err);
+                    }else{
+                        if (data.length!=0) {
+                            const userAssignment= data;
 
+                            res.json({access:true,userAvailable:true,assAvailable:true,userData:userdata,assignments:userAssignment })
+                        }else{
+                            const userAssignment= data;
+                            res.json({access:true, userAvailable:true, assAvailable:false, userData:userdata, assignments:userAssignment })
+                        }
+                    }
+                })
+                
+            }else{
+                res.json({access:true, userAvailable:false, assAvailable:false,})
+            }
+        }
+    })
+})
 
 //working
 app.post("/addbook/:apikey",(req,res)=>{
@@ -343,12 +384,12 @@ app.post("/addbook/:apikey",(req,res)=>{
         //getting all the parameter psted
         const assignments = req.body,  //text input
             bookUpload= req.files.book; //book
-
+            console.log(req.body);
         //checking if data were filled
-        if(assignments.name && assignments.subject && assignments.topic && assignments.grade && assignments.bookDescription && assignments.userid ){
-            
+        if(assignments.name!="" && assignments.subject!="" && assignments.topic!="" && assignments.grade!="" && assignments.bookDescription!="" && assignments.userid!="" ){
+            console.log(assignments);
             //checking if user Id exist
-            Student.findOne({_id: assignments.userid},(err,data)=>{
+            Student.findOne({Username: assignments.userid},(err,data)=>{
                 //condition incase of error
                 if (err) {
                     console.log(err);
@@ -419,28 +460,123 @@ app.post("/addbook/:apikey",(req,res)=>{
                                     }else{
 
                                         //retuning the final value
-                                        res.json({access:true,fill:true, user:true, verification:true, datatype:true, upload:true})
+                                        // res.open({access:true,fill:true, user:true, verification:true, datatype:true, upload:true})
+                                        // open('http://sindresorhus.com')
+                                        const mailoption= {
+                                            from: 'soludorex@gmail.com',
+                                            to: data.email,
+                                            subject: 'Mr/Mrs'+ data.Username+ " book upload",
+                                            text:'Dear '+data.Username+"book has been uploaded to book overflow.\n Thank you for your posting \n From Book overflow"
+                                        }
+        
+                                        async function sendMail() {
+                                            await myEmail.sendMail(mailoption,function (error,info) {
+                                                if (error) {
+                                                    console.log(error);
+                                                }else{
+                                                    console.log('email sent '+ info.response);
+                                                    res.render('index', {weblink})
+                                                }
+                                                
+                                            })
+                                        }
+                                        sendMail();
+                                        // res.render('index')
                                     }
                                 })
 
                             }else{
-                                res.json({access:true,fill:true, user:true, verification:true, datatype:false, upload:false})
+                                const mailoption= {
+                                    from: 'basicprogramming7@gmail.com',
+                                    to: data.email,
+                                    subject: 'Mr/Mrs'+ data.Username+ " book upload",
+                                    text:'Dear '+data.Username+" book has not been uploaded to some error from either your input of filetype \n Note: only accept: PDF, DOCX, DOC .\n Thank you for your support \n From Book overflow"
+                                }
+
+                                async function sendMail() {
+                                    await myEmail.sendMail(mailoption,function (error,info) {
+                                        if (error) {
+                                            console.log(error);
+                                        }else{
+                                            console.log('email sent '+ info.response);
+                                            res.render('index', {weblink})
+                                        }
+                                        
+                                    })
+                                }
+                                sendMail();                            
                             }
                             
                             // 
                         }else{
                             //returning if user is not verified
-                            res.json({access:true,fill:true, user:true, verification:false})
+                            const mailoption= {
+                                from: 'basicprogramming7@gmail.com',
+                                to: data.email,
+                                subject: 'Mr/Mrs'+ data.Username+ " book upload",
+                                text:'Dear '+data.Username+" book has not been uploaded to some error from either your input or you may have not been verified.\n Thank you for your support \n From Book overflow"
+                            }
+
+                            async function sendMail() {
+                                await myEmail.sendMail(mailoption,function (error,info) {
+                                    if (error) {
+                                        console.log(error);
+                                    }else{
+                                        console.log('email sent '+ info.response);
+                                        res.render('index', {weblink})
+                                    }
+                                    
+                                })
+                            }
+                            sendMail();                            
+                        
                         }
                     }else{
                         //if user is not found 
-                        res.json({access:true, fill:true, user:false })
+                        const mailoption= {
+                            from: 'basicprogramming7@gmail.com',
+                            to: data.email,
+                            subject: 'Mr/Mrs'+ data.Username+ " book upload",
+                            text:'Dear '+data.Username+"book has not been uploaded because you are not a user go to "+ weblink +" .\n Thank you for your support \n From Book overflow"
+                        }
+
+                        async function sendMail() {
+                            await myEmail.sendMail(mailoption,function (error,info) {
+                                if (error) {
+                                    console.log(error);
+                                }else{
+                                    console.log('email sent '+ info.response);
+                                    res.render('index', {weblink})
+                                }
+                                
+                            })
+                        }
+                        sendMail();                            
+                    
                     }
                 }
             })
         }else{
             //if you dont fill
-            res.json({access:true, fill:false})
+            const mailoption= {
+                from: 'basicprogramming7@gmail.com',
+                to: data.email,
+                subject: 'Mr/Mrs'+ data.Username+ " book upload",
+                text:'Dear '+data.Username+"book has not been uploaded due to some input errors.\n Please make sure you fully fill your form.\n Thank you for your support \n From Book overflow"
+            }
+
+            async function sendMail() {
+                await myEmail.sendMail(mailoption,function (error,info) {
+                    if (error) {
+                        console.log(error);
+                    }else{
+                        console.log('email sent '+ info.response);
+                        res.render('index', {weblink})
+                    }
+                    
+                })
+            }
+            sendMail();      
         }
     }else{
 
@@ -481,12 +617,56 @@ app.get('/item/:id', (req,res)=>{
             console.log(err);
         } else {
             if (data) {
-                res.json({access:true, item: true, url:data.bookLocation})
+                const itemdata= data;
+                Student.findOne({_id:itemdata.userid},(err, data)=>{
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        if (data) {
+                            const userdata= data;
+                            res.json({access:true, item: true,itemdata, user:true,userdata})
+                        }else{
+                            res.json({access:true, item: true,itemdata, user:false})
+                        }
+                    }
+                })
+                // res.json({access:true, item: true,itemdata})
             } else {
                 res.json({access:true, item:false})
             }
         }
     })
+})
+
+app.get('/delete/:apikey/:id/:userid', (req,res)=>{
+    const apikey = req.params.apikey;
+    const id= req.params.id
+    const userid = req.params.userid;
+    if (apikey=="samoaJoe") {
+        assignment.findOne({_id:id}, (err,data)=>{
+            if (err) {
+                console.log(err);
+            }else{
+                if (data) {
+                    if(userid==data.userid){
+                        assignment.remove({_id:id, userid },(err)=>{
+                            if (err) {
+                                console.log(err);
+                            }else{
+                                res.json({access:true, item:true,uservalid:true,deleted:true})
+                            }
+                        })
+                    }else{
+                        res.json({access:true, item:true, uservalid:false})
+                    }
+                }else{
+                    res.json({access:true, item:false})
+                }
+            }
+        })
+    }else{
+        res.json({access:false})
+    }
 })
 
 // working
