@@ -23,8 +23,8 @@ const mailer = require('nodemailer');
 const myEmail = mailer.createTransport({
     service:'gmail',
     auth: {
-        user:'basicprogramming7@gmail.com',
-        pass: 'learnbig'
+        user:'soludorex@gmail.com',
+        pass: 'Xerewgida1$'
     }
 });
 
@@ -87,7 +87,7 @@ mongoose.connect('mongodb+srv://soludo:xerewgida@studenass.7efor.mongodb.net/stu
 })
 
 //website
-const weblink ='http://localhost:4000/';
+const weblink ='https://book-overflow.herokuapp.com/';
 
 const open =require('open')
 
@@ -260,7 +260,7 @@ app.post("/verify/:apikey/:user", (req,res)=>{
 //working
 app.get("/verify/:apikey/:user",(req,res)=>{
     const apikey= req.params.apikey;
-    const emails = (req.params.user).toString();
+    const emails = req.params.user;
     if (apikey=="samoaJoe"){
         Student.findOne({Username:emails},(err,data)=>{
             if (err){
@@ -487,7 +487,7 @@ app.post("/addbook/:apikey",(req,res)=>{
 
                             }else{
                                 const mailoption= {
-                                    from: 'basicprogramming7@gmail.com',
+                                    from: 'soludorex@gmail.com',
                                     to: data.email,
                                     subject: 'Mr/Mrs'+ data.Username+ " book upload",
                                     text:'Dear '+data.Username+" book has not been uploaded to some error from either your input of filetype \n Note: only accept: PDF, DOCX, DOC .\n Thank you for your support \n From Book overflow"
@@ -511,7 +511,7 @@ app.post("/addbook/:apikey",(req,res)=>{
                         }else{
                             //returning if user is not verified
                             const mailoption= {
-                                from: 'basicprogramming7@gmail.com',
+                                from: 'soludorex@gmail.com',
                                 to: data.email,
                                 subject: 'Mr/Mrs'+ data.Username+ " book upload",
                                 text:'Dear '+data.Username+" book has not been uploaded to some error from either your input or you may have not been verified.\n Thank you for your support \n From Book overflow"
@@ -534,7 +534,7 @@ app.post("/addbook/:apikey",(req,res)=>{
                     }else{
                         //if user is not found 
                         const mailoption= {
-                            from: 'basicprogramming7@gmail.com',
+                            from: 'soludorex@gmail.com',
                             to: data.email,
                             subject: 'Mr/Mrs'+ data.Username+ " book upload",
                             text:'Dear '+data.Username+"book has not been uploaded because you are not a user go to "+ weblink +" .\n Thank you for your support \n From Book overflow"
@@ -559,7 +559,7 @@ app.post("/addbook/:apikey",(req,res)=>{
         }else{
             //if you dont fill
             const mailoption= {
-                from: 'basicprogramming7@gmail.com',
+                from: 'soludorex@gmail.com',
                 to: data.email,
                 subject: 'Mr/Mrs'+ data.Username+ " book upload",
                 text:'Dear '+data.Username+"book has not been uploaded due to some input errors.\n Please make sure you fully fill your form.\n Thank you for your support \n From Book overflow"
