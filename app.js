@@ -23,8 +23,8 @@ const mailer = require('nodemailer');
 const myEmail = mailer.createTransport({
     service:'gmail',
     auth: {
-        user:'soludorex@gmail.com',
-        pass: 'Xerewgida1$'
+        user:'******',
+        pass: '*******'
     }
 });
 
@@ -74,7 +74,7 @@ const assignment = require('./models/assignment');
 app.set('view engine','ejs')
 // const assignment = require('./models/assignment');
 
-mongoose.connect('mongodb+srv://soludo:xerewgida@studenass.7efor.mongodb.net/studenAss?retryWrites=true&w=majority',{useNewUrlParser:true, useUnifiedTopology:true}).then((result)=>{
+mongoose.connect('mongodb+srv://*****:******@studenass.7efor.mongodb.net/studenAss?retryWrites=true&w=majority',{useNewUrlParser:true, useUnifiedTopology:true}).then((result)=>{
     if (result){
         console.log("db connected");
 
